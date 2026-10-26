@@ -389,6 +389,26 @@ async fn wrong_pairing_code_is_rejected_and_window_closes_after_three() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn sync_methods_work_outside_the_runtime() {
+    // Tauri runs non-async commands on the main thread, which has no Tokio
+    // context. Opening a pairing window there used to abort the app.
+    let a = Node::new("mac").await;
+    let ws = WorkspaceId::new();
+    a.register(ws);
+    a.write("hello.txt", b"hi\n");
+    let engine = a.engine.clone();
+    let w = std::thread::spawn(move || {
+        engine.workspace_added(ws);
+        engine.pairing_open()
+    })
+    .join()
+    .expect("no panic outside the runtime")
+    .unwrap();
+    assert_eq!(a.engine.pairing_current().map(|c| c.code), Some(w.code));
+    eventually("workspace indexed", 10, || !a.store.lock().unwrap().manifest_all(ws).unwrap().is_empty()).await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn interrupted_large_transfer_resumes_after_restart() {
     let (a, mut b, ws) = setup().await;
     // 24 MiB of incompressible-ish data.

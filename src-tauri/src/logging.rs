@@ -7,6 +7,8 @@ use std::path::Path;
 
 use devbridge_core::redact::redact;
 use tracing_subscriber::fmt::MakeWriter;
+use tracing_subscriber::fmt::format::Writer;
+use tracing_subscriber::fmt::time::{FormatTime, SystemTime};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Layer};
@@ -64,6 +66,25 @@ pub fn init(logs_dir: &Path) -> Option<tracing_appender::non_blocking::WorkerGua
     guard
 }
 
+const CRASH_LOG: &str = "crash.log";
+
+/// Release builds abort on panic, so lines still queued for the non-blocking
+/// file writer are lost. Panics are appended to `crash.log` synchronously.
+pub fn install_panic_hook(logs_dir: &Path) {
+    let path = logs_dir.join(CRASH_LOG);
+    let default = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        let mut at = String::new();
+        let _ = SystemTime.format_time(&mut Writer::new(&mut at));
+        let thread = std::thread::current();
+        let line = format!("{at} thread '{}' {info}\n", thread.name().unwrap_or("<unnamed>"));
+        if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
+            let _ = f.write_all(redact(&line).as_bytes());
+        }
+        default(info);
+    }));
+}
+
 /// Last `n` lines of today's (or the newest) log file.
 pub fn tail(logs_dir: &Path, n: usize) -> Vec<String> {
     let mut files: Vec<_> = std::fs::read_dir(logs_dir)
@@ -71,7 +92,16 @@ pub fn tail(logs_dir: &Path, n: usize) -> Vec<String> {
         .unwrap_or_default();
     files.sort_by_key(|e| e.file_name());
     let Some(last) = files.last() else { return vec![] };
-    let content = std::fs::read_to_string(last.path()).unwrap_or_default();
+    last_lines(&last.path(), n)
+}
+
+/// Last `n` lines of the crash log.
+pub fn crash_tail(logs_dir: &Path, n: usize) -> Vec<String> {
+    last_lines(&logs_dir.join(CRASH_LOG), n)
+}
+
+fn last_lines(path: &Path, n: usize) -> Vec<String> {
+    let content = std::fs::read_to_string(path).unwrap_or_default();
     let lines: Vec<String> = content.lines().map(redact).collect();
     lines[lines.len().saturating_sub(n)..].to_vec()
 }

@@ -54,3 +54,5 @@
 - Settings → Logs & diagnostics → *Export diagnostic report* creates a JSON file without file
   contents or secrets (project paths are included). Logs are in the app data `logs` folder;
   set `DEVBRIDGE_LOG=debug` before launching for more detail.
+- If DevBridge closes unexpectedly, `logs/crash.log` records where it stopped; the diagnostic
+  report includes it.

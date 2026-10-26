@@ -40,6 +40,11 @@ Run everything with `npm run check` (TypeScript, ESLint, Vitest, rustfmt, clippy
 - Pairing window closed 200 ms after the third wrong code (race) → closed before replying.
 - Catch up Git used stash + merge, which rewrites files; with `core.autocrlf=true` (common on
   Windows) that would turn synced LF files into CRLF → now moves only the branch and index.
+- *Pair new device* aborted the real app (found on the first Windows run; every platform was
+  affected): Tauri runs sync commands on the main thread, outside the Tokio runtime, and
+  opening the window spawns its expiry timer. The engine now enters its own runtime in sync
+  methods that spawn, and panics are written to `logs/crash.log` (release builds abort on
+  panic, so they used to leave no trace).
 
 ## Not yet verified (honest gaps)
 - **Windows:** nothing has been run on Windows yet. The CI workflow runs the full suite on

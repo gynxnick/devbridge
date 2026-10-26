@@ -184,6 +184,9 @@ pub(crate) struct Inner {
     backoff: Mutex<HashMap<DeviceId, Backoff>>,
     session_seq: AtomicU64,
     shutdown: AtomicBool,
+    /// The runtime the engine was started on, entered by sync methods that
+    /// spawn tasks (callers such as Tauri's sync commands run outside it).
+    rt: tokio::runtime::Handle,
 }
 
 fn guard<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
@@ -293,6 +296,7 @@ impl Engine {
             backoff: Mutex::new(HashMap::new()),
             session_seq: AtomicU64::new(1),
             shutdown: AtomicBool::new(false),
+            rt: tokio::runtime::Handle::current(),
         });
         let engine = Engine { inner };
         engine.spawn_accept_loop(conn_rx);
@@ -551,6 +555,7 @@ impl Engine {
 
     /// Starts syncing a registered workspace (no-op if already running).
     pub fn workspace_added(&self, ws: WorkspaceId) {
+        let _rt = self.inner.rt.enter();
         let mut map = guard(&self.inner.workspaces);
         if map.contains_key(&ws) {
             return;
@@ -672,6 +677,7 @@ impl Engine {
     // ---------------- pairing ----------------
 
     pub fn pairing_open(&self) -> Result<PairingWindow, SyncError> {
+        let _rt = self.inner.rt.enter();
         pair::open(self)
     }
 
