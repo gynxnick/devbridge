@@ -81,6 +81,7 @@ pub fn export_diagnostics(state: State<'_, AppState>, path: String) -> CmdResult
         "settings": settings,
         "recentActivity": s.recent_audit(200)?,
         "log": crate::logging::tail(&state.logs_dir, 500),
+        "crashes": crate::logging::crash_tail(&state.logs_dir, 100),
     });
     let text = serde_json::to_string_pretty(&report).map_err(CmdError::internal)?;
     std::fs::write(&path, devbridge_core::redact::redact(&text))

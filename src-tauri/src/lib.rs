@@ -31,6 +31,7 @@ pub fn run() {
             };
             let logs_dir = data_dir.join("logs");
             let guard = logging::init(&logs_dir);
+            logging::install_panic_hook(&logs_dir);
             app.manage(LogGuard(guard));
             let state = state::AppState::init(data_dir, logs_dir)?;
             forward_events(app.handle().clone(), &state);
