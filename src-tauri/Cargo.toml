@@ -1,0 +1,45 @@
+[package]
+name = "devbridge"
+version.workspace = true
+description = "DevBridge: continue the same project across your Mac and Windows PC"
+authors = ["gynxnick"]
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lib]
+# The `_lib` suffix keeps the lib name distinct from the bin name (cargo#8519 on Windows).
+name = "devbridge_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.4", features = [] }
+
+[dependencies]
+devbridge-core.workspace = true
+devbridge-git.workspace = true
+devbridge-store.workspace = true
+devbridge-workspace.workspace = true
+devbridge-fs.workspace = true
+devbridge-net.workspace = true
+devbridge-sync.workspace = true
+devbridge-remote.workspace = true
+data-encoding.workspace = true
+tokio.workspace = true
+tracing-appender.workspace = true
+ulid.workspace = true
+gethostname.workspace = true
+os_info.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tauri = { version = "2.12.5", features = [] }
+tauri-plugin-dialog = "2.8.3"
+tauri-plugin-opener = "2.7.2"
+tauri-plugin-notification = "2.7.0"
+tauri-plugin-autostart = "2.7.0"
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[lints]
+workspace = true

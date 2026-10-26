@@ -1,0 +1,31 @@
+[package]
+name = "devbridge-sync"
+description = "Sync engine: local indexing, peer protocol, transfers, conflict handling"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+blake3.workspace = true
+data-encoding.workspace = true
+devbridge-net.workspace = true
+devbridge-core.workspace = true
+devbridge-fs.workspace = true
+
+devbridge-store.workspace = true
+rand.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+ulid.workspace = true
+
+[dev-dependencies]
+devbridge-git.workspace = true
+tracing-subscriber.workspace = true
+tempfile.workspace = true
+
+[lints]
+workspace = true

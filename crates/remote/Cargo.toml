@@ -1,0 +1,16 @@
+[package]
+name = "devbridge-remote"
+description = "Remote Workspace Mode: SSH key, authorized_keys and VS Code Remote-SSH setup"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

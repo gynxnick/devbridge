@@ -1,0 +1,27 @@
+[package]
+name = "devbridge-net"
+description = "Device identity, pinned mutual TLS transport, framing, pairing and LAN discovery"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+data-encoding.workspace = true
+devbridge-core.workspace = true
+keyring.workspace = true
+mdns-sd.workspace = true
+qrcode.workspace = true
+rand.workspace = true
+rcgen.workspace = true
+ring.workspace = true
+rustls.workspace = true
+serde_json.workspace = true
+spake2.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-rustls.workspace = true
+tracing.workspace = true
+
+[lints]
+workspace = true
